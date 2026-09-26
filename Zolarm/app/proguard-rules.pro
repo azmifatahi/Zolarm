@@ -1,7 +1,0 @@
--keep class com.zolarm.app.data.** { *; }
--keepattributes *Annotation*, InnerClasses
--dontwarn kotlinx.coroutines.**
--keep class * extends androidx.room.RoomDatabase
--dontwarn androidx.room.paging.**
--keep class androidx.camera.** { *; }
--dontwarn androidx.camera.**
