@@ -12,18 +12,31 @@ android {
         applicationId = "com.zolarm.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.2.1"
+        versionCode = 5
+        versionName = "1.2.2"
         multiDexEnabled = true
 
         vectorDrawables { useSupportLibrary = true }
     }
 
+    signingConfigs {
+        create("zolarmDebug") {
+            storeFile = rootProject.file("keystore/zolarm-debug.jks")
+            storePassword = "zolarmdebug"
+            keyAlias = "zolarm"
+            keyPassword = "zolarmdebug"
+        }
+    }
+
     buildTypes {
-        debug { isMinifyEnabled = false }
+        debug {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("zolarmDebug")
+        }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("zolarmDebug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
