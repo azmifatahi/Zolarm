@@ -12,11 +12,14 @@ android {
         applicationId = "com.zolarm.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.2.2"
+        versionCode = 6
+        versionName = "1.2.3"
         multiDexEnabled = true
 
         vectorDrawables { useSupportLibrary = true }
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        }
     }
 
     signingConfigs {
@@ -67,9 +70,7 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/DEPENDENCIES"
-        }
-        jniLibs {
-            useLegacyPackaging = true
+            excludes += "META-INF/versions/**"
         }
     }
 
