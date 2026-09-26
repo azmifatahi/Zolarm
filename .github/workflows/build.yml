@@ -26,6 +26,7 @@ concurrency:
 env:
   GRADLE_VERSION: "8.7"
   JAVA_VERSION: "17"
+  # Preinstalled on GitHub-hosted ubuntu runners
   ANDROID_HOME: /usr/local/lib/android/sdk
   ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
@@ -51,6 +52,7 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME"
           ls -la "$ANDROID_HOME" || true
 
+          # Find sdkmanager (path varies by runner image)
           SDKMANAGER=""
           for candidate in \
             "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
@@ -73,9 +75,11 @@ jobs:
           fi
 
           echo "Using sdkmanager: $SDKMANAGER"
+          # Non-interactive license accept
           yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/tmp/sdk-licenses.log 2>&1 || true
           tail -20 /tmp/sdk-licenses.log || true
 
+          # Install what we need (idempotent)
           yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" \
             "platforms;android-34" \
             "build-tools;34.0.0" \
