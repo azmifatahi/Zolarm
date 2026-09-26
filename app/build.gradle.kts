@@ -12,8 +12,8 @@ android {
         applicationId = "com.zolarm.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
 
         vectorDrawables { useSupportLibrary = true }
             }
@@ -96,6 +96,10 @@ dependencies {
     implementation("androidx.camera:camera-view:$cameraxVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
+    // Face detection for wake-up camera challenge
+    implementation("com.google.mlkit:face-detection:16.1.7")
+    implementation("com.google.android.gms:play-services-mlkit-face-detection:17.1.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

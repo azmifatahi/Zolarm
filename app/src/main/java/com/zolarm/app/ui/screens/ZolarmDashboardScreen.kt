@@ -147,9 +147,12 @@ fun ZolarmDashboardScreen(
                                 updateChecking = true
                                 updateResult = null
                                 scope.launch {
-                                    val result = UpdateChecker.check()
+                                    val result = UpdateChecker.checkAndDownload(context)
                                     updateChecking = false
                                     updateResult = result
+                                    if (!result.isLatest && result.downloadedApk != null) {
+                                        UpdateChecker.installApk(context, result.downloadedApk)
+                                    }
                                 }
                             },
                             leadingIcon = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) }

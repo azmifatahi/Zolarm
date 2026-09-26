@@ -17,7 +17,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.zolarm.app.core.LocaleHelper
 import com.zolarm.app.core.NotificationChannels
+import com.zolarm.app.core.UpdateChecker
 import com.zolarm.app.core.ZolarmPermissions
 import com.zolarm.app.data.AlarmEntity
 import com.zolarm.app.ui.screens.AddEditAlarmScreen
@@ -49,6 +52,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         NotificationChannels.ensureAll(this)
         requestStartupPermissions()
+        autoCheckUpdate()
 
         setContent {
             ZolarmTheme {
@@ -56,6 +60,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) { ZolarmApp() }
+            }
+        }
+    }
+
+    private fun autoCheckUpdate() {
+        lifecycleScope.launch {
+            runCatching {
+                val result = UpdateChecker.checkAndDownload(applicationContext)
+                if (!result.isLatest && result.downloadedApk != null) {
+                    UpdateChecker.installApk(this@MainActivity, result.downloadedApk)
+                }
             }
         }
     }
