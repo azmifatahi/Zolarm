@@ -1,5 +1,7 @@
 package com.zolarm.app.core
 
+import android.content.Context
+import com.zolarm.app.R
 import java.util.Calendar
 
 /**
@@ -21,9 +23,25 @@ object RepeatDays {
     const val WEEKENDS  = SATURDAY or SUNDAY
 
     val orderedBits = listOf(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
-    val shortLabels = listOf("M", "T", "W", "T", "F", "S", "S")
-    val fullLabels = listOf(
-        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+
+    fun shortLabels(context: Context): List<String> = listOf(
+        context.getString(R.string.day_mon),
+        context.getString(R.string.day_tue),
+        context.getString(R.string.day_wed),
+        context.getString(R.string.day_thu),
+        context.getString(R.string.day_fri),
+        context.getString(R.string.day_sat),
+        context.getString(R.string.day_sun)
+    )
+
+    fun fullLabels(context: Context): List<String> = listOf(
+        context.getString(R.string.day_monday),
+        context.getString(R.string.day_tuesday),
+        context.getString(R.string.day_wednesday),
+        context.getString(R.string.day_thursday),
+        context.getString(R.string.day_friday),
+        context.getString(R.string.day_saturday),
+        context.getString(R.string.day_sunday)
     )
 
     fun indexOf(calendarDayOfWeek: Int): Int = when (calendarDayOfWeek) {
@@ -40,13 +58,25 @@ object RepeatDays {
 
     fun toggle(mask: Int, index: Int): Int = mask xor (1 shl index)
 
+    fun toDisplayString(context: Context, mask: Int): String = when (mask) {
+        NONE      -> context.getString(R.string.repeat_once)
+        EVERY_DAY -> context.getString(R.string.repeat_every_day)
+        WEEKDAYS  -> context.getString(R.string.repeat_weekdays)
+        WEEKENDS  -> context.getString(R.string.repeat_weekends)
+        else -> {
+            val labels = fullLabels(context)
+            orderedBits.mapIndexedNotNull { index, _ ->
+                if (isOn(mask, index)) labels[index].take(3) else null
+            }.joinToString("، ")
+        }
+    }
+
+    /** Fallback without Context (logs / non-UI). */
     fun toDisplayString(mask: Int): String = when (mask) {
-        NONE      -> "Once"
+        NONE -> "Once"
         EVERY_DAY -> "Every day"
-        WEEKDAYS  -> "Weekdays"
-        WEEKENDS  -> "Weekends"
-        else -> orderedBits.mapIndexedNotNull { index, _ ->
-            if (isOn(mask, index)) fullLabels[index].take(3) else null
-        }.joinToString(", ")
+        WEEKDAYS -> "Weekdays"
+        WEEKENDS -> "Weekends"
+        else -> "Custom"
     }
 }

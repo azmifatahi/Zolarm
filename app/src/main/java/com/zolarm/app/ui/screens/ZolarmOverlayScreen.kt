@@ -47,7 +47,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zolarm.app.R
 import com.zolarm.app.challenge.CameraChallenge
 import com.zolarm.app.challenge.StepCounterManager
 import com.zolarm.app.core.AlarmPayload
@@ -108,7 +110,7 @@ fun ZolarmOverlayScreen(
                 ZolarmLogo(modifier = Modifier.size(36.dp))
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    text = "ZOLARM",
+                    text = stringResource(R.string.dashboard_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Black,
                     color = NeonCyan
@@ -125,7 +127,7 @@ fun ZolarmOverlayScreen(
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = payload.label.ifBlank { "Wake up" },
+                text = payload.label.ifBlank { stringResource(R.string.reminder_default) },
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -176,8 +178,8 @@ fun ZolarmOverlayScreen(
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = if (challengeCompleted) "DISMISS ALARM"
-                    else "COMPLETE CHALLENGE TO DISMISS",
+                    text = if (challengeCompleted) stringResource(R.string.overlay_dismiss)
+                    else stringResource(R.string.overlay_locked),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -186,8 +188,8 @@ fun ZolarmOverlayScreen(
             Spacer(Modifier.height(10.dp))
 
             Text(
-                text = if (challengeCompleted) "Great. Now go crush the day."
-                else "Back button and swipe-away are disabled. No shortcuts.",
+                text = if (challengeCompleted) stringResource(R.string.overlay_hint_done)
+                else stringResource(R.string.overlay_hint_locked),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -222,7 +224,7 @@ private fun StepChallengeContent(
             Icon(Icons.Filled.DirectionsWalk, contentDescription = null, tint = NeonCyan)
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "STEP CHALLENGE",
+                text = stringResource(R.string.step_challenge),
                 style = MaterialTheme.typography.labelMedium,
                 color = NeonCyan,
                 fontWeight = FontWeight.Bold
@@ -256,7 +258,7 @@ private fun StepChallengeContent(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = steps.toString() + " / " + stepGoal + " steps taken",
+            text = stringResource(R.string.steps_progress, steps, stepGoal),
             style = MaterialTheme.typography.titleMedium,
             color = if (progress >= 1f) NeonLime else MaterialTheme.colorScheme.onSurface
         )
@@ -264,7 +266,7 @@ private fun StepChallengeContent(
         if (!sensorAvailable) {
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "No step sensor detected - move the phone in a walking rhythm to register steps.",
+                text = stringResource(R.string.no_step_sensor),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center
@@ -282,7 +284,7 @@ private fun CameraChallengeContent(
             Box(modifier = Modifier.size(8.dp).background(NeonViolet, CircleShape))
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "CAMERA CHALLENGE",
+                text = stringResource(R.string.camera_challenge),
                 style = MaterialTheme.typography.labelMedium,
                 color = NeonViolet,
                 fontWeight = FontWeight.Bold

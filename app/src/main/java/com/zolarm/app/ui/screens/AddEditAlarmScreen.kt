@@ -52,7 +52,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zolarm.app.R
 import com.zolarm.app.core.RepeatDays
 import com.zolarm.app.data.AlarmEntity
 import com.zolarm.app.data.ChallengeType
@@ -76,6 +79,7 @@ fun AddEditAlarmScreen(
     var stepGoal by remember { mutableIntStateOf(initialAlarm?.stepGoal ?: 10) }
     var repeatMask by remember { mutableIntStateOf(initialAlarm?.repeatDays ?: 0) }
 
+    val context = LocalContext.current
     val timePickerState = rememberTimePickerState(
         initialHour = initialAlarm?.hour ?: 7,
         initialMinute = initialAlarm?.minute ?: 0,
@@ -89,13 +93,13 @@ fun AddEditAlarmScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (isEditing) "Edit reminder" else "New reminder",
+                        text = if (isEditing) stringResource(R.string.edit_existing) else stringResource(R.string.edit_new),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -135,8 +139,8 @@ fun AddEditAlarmScreen(
             OutlinedTextField(
                 value = label,
                 onValueChange = { label = it.take(48) },
-                label = { Text("Task label") },
-                placeholder = { Text("e.g. Gym, Study, Stand up") },
+                label = { Text(stringResource(R.string.label_task)) },
+                placeholder = { Text(stringResource(R.string.label_hint)) },
                 singleLine = true,
                 shape = RoundedCornerShape(18.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -146,7 +150,7 @@ fun AddEditAlarmScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            SectionTitle("Dismissal challenge")
+            SectionTitle(stringResource(R.string.challenge_section))
 
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SegmentedButton(
@@ -162,7 +166,7 @@ fun AddEditAlarmScreen(
                 ) {
                     Icon(Icons.Filled.DirectionsWalk, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Steps")
+                    Text(stringResource(R.string.challenge_steps))
                 }
                 SegmentedButton(
                     selected = challengeType == ChallengeType.CAMERA,
@@ -177,7 +181,7 @@ fun AddEditAlarmScreen(
                 ) {
                     Icon(Icons.Filled.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Camera")
+                    Text(stringResource(R.string.challenge_camera))
                 }
             }
 
@@ -192,7 +196,7 @@ fun AddEditAlarmScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Required steps", style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(R.string.required_steps), style = MaterialTheme.typography.bodyLarge)
                             Text(
                                 text = stepGoal.toString(),
                                 style = MaterialTheme.typography.titleMedium,
@@ -212,7 +216,7 @@ fun AddEditAlarmScreen(
                             )
                         )
                         Text(
-                            text = "Zolarm will not let you dismiss until you physically walk these steps.",
+                            text = stringResource(R.string.steps_hint),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -220,10 +224,10 @@ fun AddEditAlarmScreen(
                 }
             }
 
-            SectionTitle("Repeat")
+            SectionTitle(stringResource(R.string.repeat_section))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                RepeatDays.shortLabels.forEachIndexed { index, shortLabel ->
+                RepeatDays.shortLabels(context).forEachIndexed { index, shortLabel ->
                     val selected = RepeatDays.isOn(repeatMask, index)
                     FilterChip(
                         selected = selected,
@@ -240,16 +244,16 @@ fun AddEditAlarmScreen(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                QuickRepeatChip("Every day", RepeatDays.EVERY_DAY) { repeatMask = it }
-                QuickRepeatChip("Weekdays", RepeatDays.WEEKDAYS) { repeatMask = it }
-                QuickRepeatChip("Weekends", RepeatDays.WEEKENDS) { repeatMask = it }
-                QuickRepeatChip("Once", RepeatDays.NONE) { repeatMask = it }
+                QuickRepeatChip(stringResource(R.string.every_day), RepeatDays.EVERY_DAY) { repeatMask = it }
+                QuickRepeatChip(stringResource(R.string.weekdays), RepeatDays.WEEKDAYS) { repeatMask = it }
+                QuickRepeatChip(stringResource(R.string.weekends), RepeatDays.WEEKENDS) { repeatMask = it }
+                QuickRepeatChip(stringResource(R.string.once), RepeatDays.NONE) { repeatMask = it }
             }
 
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = "Schedule: " + RepeatDays.toDisplayString(repeatMask),
+                text = stringResource(R.string.schedule_prefix, RepeatDays.toDisplayString(context, repeatMask)),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -262,7 +266,7 @@ fun AddEditAlarmScreen(
                         id = initialAlarm?.id ?: 0L,
                         hour = timePickerState.hour,
                         minute = timePickerState.minute,
-                        label = label.ifBlank { "Reminder" },
+                        label = label.ifBlank { "تذكير" },
                         challengeType = challengeType,
                         stepGoal = stepGoal,
                         repeatDays = repeatMask,
@@ -277,7 +281,7 @@ fun AddEditAlarmScreen(
                 Icon(Icons.Filled.Check, contentDescription = null)
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    text = if (isEditing) "Save changes" else "Arm Zolarm",
+                    text = if (isEditing) stringResource(R.string.save_changes) else stringResource(R.string.arm_zolarm),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )

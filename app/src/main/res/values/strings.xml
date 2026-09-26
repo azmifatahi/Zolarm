@@ -1,16 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Zolarm</string>
-    <string name="app_tagline">No excuses. Get up.</string>
+    <string name="app_name">زولارم</string>
+    <string name="app_tagline">لا أعذار. انهض.</string>
 
-    <string name="channel_alarm_name">Zolarm Alarms</string>
-    <string name="channel_alarm_desc">Full-screen forced alarms</string>
-    <string name="channel_service_name">Zolarm Engine</string>
-    <string name="channel_service_desc">Keeps the alarm engine alive in background</string>
+    <string name="channel_alarm_name">تنبيهات زولارم</string>
+    <string name="channel_alarm_desc">تنبيهات ملء الشاشة الإلزامية</string>
+    <string name="channel_service_name">محرك زولارم</string>
+    <string name="channel_service_desc">يبقي محرك التنبيه نشطاً في الخلفية</string>
 
-    <string name="notif_alarm_title">\u23F0 %1$s</string>
-    <string name="notif_alarm_text">Zolarm is ringing - complete your challenge</string>
-    <string name="notif_service_title">Zolarm engine active</string>
-    <string name="notif_service_text">Monitoring %1$d active reminder(s)</string>
-    <string name="action_dismiss">Dismiss</string>
+    <string name="notif_alarm_title">⏰ %1$s</string>
+    <string name="notif_alarm_text">زولارم يرن — أكمل التحدي</string>
+    <string name="notif_service_title">محرك زولارم نشط</string>
+    <string name="notif_service_text">مراقبة %1$d تذكير نشط</string>
+    <string name="action_dismiss">إغلاق</string>
+
+    <string name="menu_about">حول التطبيق</string>
+    <string name="menu_check_update">البحث عن تحديث</string>
+    <string name="menu_settings">الإعدادات</string>
+    <string name="menu_permissions">الصلاحيات</string>
+
+    <string name="about_title">حول زولارم</string>
+    <string name="about_body">زولارم — تذكير ومهام بصعوبة عالية.\nأكمل التحدي (خطوات أو صورة) لإيقاف المنبّه.\nالإصدار %1$s</string>
+    <string name="about_ok">حسناً</string>
+
+    <string name="update_checking">جاري البحث عن تحديث…</string>
+    <string name="update_latest">أنت على أحدث إصدار (%1$s)</string>
+    <string name="update_available">يتوفر إصدار جديد: %1$s\nالحالي: %2$s</string>
+    <string name="update_open">فتح صفحة التحميل</string>
+    <string name="update_failed">تعذّر التحقق من التحديث. تحقق من الاتصال.</string>
+    <string name="update_cancel">لاحقاً</string>
+
+    <string name="dashboard_title">زولارم</string>
+    <string name="active_reminders">التذكيرات النشطة</string>
+    <string name="add_reminder">إضافة تذكير</string>
+    <string name="create_reminder">إنشاء تذكير</string>
+    <string name="no_reminders">لا توجد تذكيرات بعد</string>
+    <string name="no_reminders_hint">أنشئ أول منبّه قوي ودع زولارم يضمن أنك تستيقظ فعلاً.</string>
+    <string name="edit">تعديل</string>
+    <string name="delete">حذف</string>
+    <string name="reminder_default">تذكير</string>
+    <string name="steps_label">%1$d خطوة</string>
+    <string name="photo_label">صورة</string>
+
+    <string name="permission_title">زولارم يحتاج صلاحيات كاملة</string>
+    <string name="permission_missing">ناقص: %1$s</string>
+    <string name="permission_runtime">تشغيلية</string>
+    <string name="permission_overlay">فوق التطبيقات</string>
+    <string name="permission_exact">دقّة المنبّه</string>
+    <string name="permission_battery">البطارية</string>
+    <string name="permission_dnd">تجاوز الوضع الصامت / عدم الإزعاج</string>
+
+    <string name="edit_new">تذكير جديد</string>
+    <string name="edit_existing">تعديل التذكير</string>
+    <string name="label_task">عنوان المهمة</string>
+    <string name="label_hint">مثال: جيم، دراسة، استيقاظ</string>
+    <string name="challenge_section">تحدي الإيقاف</string>
+    <string name="challenge_steps">خطوات</string>
+    <string name="challenge_camera">كاميرا</string>
+    <string name="required_steps">الخطوات المطلوبة</string>
+    <string name="steps_hint">لن يُسمح بالإغلاق حتى تمشي هذا العدد فعلياً.</string>
+    <string name="repeat_section">التكرار</string>
+    <string name="every_day">كل يوم</string>
+    <string name="weekdays">أيام العمل</string>
+    <string name="weekends">عطلة نهاية الأسبوع</string>
+    <string name="once">مرة واحدة</string>
+    <string name="schedule_prefix">الجدول: %1$s</string>
+    <string name="save_changes">حفظ التغييرات</string>
+    <string name="arm_zolarm">تفعيل زولارم</string>
+    <string name="back">رجوع</string>
+
+    <string name="overlay_locked">أكمل التحدي للإغلاق</string>
+    <string name="overlay_dismiss">إغلاق المنبّه</string>
+    <string name="overlay_hint_locked">زر الرجوع والإغلاق بالسحب معطّلان. لا اختصارات.</string>
+    <string name="overlay_hint_done">ممتاز. انطلق ليومك.</string>
+    <string name="step_challenge">تحدي الخطوات</string>
+    <string name="camera_challenge">تحدي الكاميرا</string>
+    <string name="steps_progress">%1$d / %2$d خطوة</string>
+    <string name="no_step_sensor">لا يوجد مستشعر خطوات — حرّك الهاتف بإيقاع المشي.</string>
+    <string name="camera_prove">أثبت أنك مستيقظ — التقط صورة لإلغاء القفل.</string>
+    <string name="camera_permission_required">صلاحية الكاميرا مطلوبة</string>
+    <string name="camera_permission_hint">امنح صلاحية الكاميرا ليتحقق زولارم بالصورة.</string>
+    <string name="grant_camera">منح صلاحية الكاميرا</string>
+    <string name="capture_photo">التقاط صورة</string>
+    <string name="switch_camera">تبديل الكاميرا</string>
+    <string name="front_camera">أمامية</string>
+    <string name="back_camera">خلفية</string>
+    <string name="capturing">جاري الالتقاط…</string>
+
+    <string name="repeat_once">مرة واحدة</string>
+    <string name="repeat_every_day">كل يوم</string>
+    <string name="repeat_weekdays">أيام العمل</string>
+    <string name="repeat_weekends">عطلة</string>
+    <string name="day_mon">ن</string>
+    <string name="day_tue">ث</string>
+    <string name="day_wed">ر</string>
+    <string name="day_thu">خ</string>
+    <string name="day_fri">ج</string>
+    <string name="day_sat">س</string>
+    <string name="day_sun">ح</string>
+    <string name="day_monday">الإثنين</string>
+    <string name="day_tuesday">الثلاثاء</string>
+    <string name="day_wednesday">الأربعاء</string>
+    <string name="day_thursday">الخميس</string>
+    <string name="day_friday">الجمعة</string>
+    <string name="day_saturday">السبت</string>
+    <string name="day_sunday">الأحد</string>
 </resources>
