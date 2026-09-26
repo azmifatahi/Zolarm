@@ -1,6 +1,7 @@
 package com.zolarm.app.ui.overlay
 
 import android.app.KeyguardManager
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import com.zolarm.app.core.AlarmExtras
+import com.zolarm.app.core.LocaleHelper
 import com.zolarm.app.core.AlarmPayload
 import com.zolarm.app.service.ZolarmForegroundService
 import com.zolarm.app.ui.screens.ZolarmOverlayScreen
@@ -22,9 +24,14 @@ import com.zolarm.app.ui.theme.ZolarmTheme
 
 class ZolarmOverlayActivity : ComponentActivity() {
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(newBase))
+    }
+
     private lateinit var payload: AlarmPayload
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        LocaleHelper.applyAppLocale()
         super.onCreate(savedInstanceState)
 
         payload = AlarmExtras.read(intent) ?: run { finish(); return }

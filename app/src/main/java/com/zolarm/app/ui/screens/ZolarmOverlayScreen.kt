@@ -151,7 +151,10 @@ fun ZolarmOverlayScreen(
                             onCompleted = { challengeCompleted = true }
                         )
                         ChallengeType.CAMERA -> CameraChallengeContent(
-                            onCompleted = { challengeCompleted = true }
+                            onCompleted = {
+                                challengeCompleted = true
+                                onDismissed() // إيقاف المنبّه فوراً بعد التقاط الصورة
+                            }
                         )
                     }
                 }

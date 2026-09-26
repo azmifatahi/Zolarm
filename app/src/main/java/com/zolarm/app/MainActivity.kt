@@ -2,6 +2,7 @@ package com.zolarm.app
 
 import android.Manifest
 import android.os.Build
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.zolarm.app.core.LocaleHelper
 import com.zolarm.app.core.NotificationChannels
 import com.zolarm.app.core.ZolarmPermissions
 import com.zolarm.app.data.AlarmEntity
@@ -32,12 +34,17 @@ import com.zolarm.app.ui.viewmodel.AlarmViewModel
 
 class MainActivity : ComponentActivity() {
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(newBase))
+    }
+
     private val runtimePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { /* results surface via ZolarmPermissions */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+        LocaleHelper.applyAppLocale()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         NotificationChannels.ensureAll(this)

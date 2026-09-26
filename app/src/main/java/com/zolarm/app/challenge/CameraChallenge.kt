@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -53,11 +53,13 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.zolarm.app.R
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 @Composable
@@ -92,10 +94,13 @@ fun CameraChallenge(
         return
     }
 
+    // Default front camera for "prove you are awake"
     var useFrontCamera by remember { mutableStateOf(true) }
     var isCapturing by remember { mutableStateOf(false) }
     var cameraBound by remember { mutableStateOf(false) }
     var bindError by remember { mutableStateOf<String?>(null) }
+    var countdown by remember { mutableIntStateOf(3) }
+    var autoStarted by remember { mutableStateOf(false) }
 
     val previewView = remember {
         PreviewView(context).apply {
@@ -109,10 +114,31 @@ fun CameraChallenge(
             .build()
     }
 
-    // Re-bind whenever lens changes
+    fun doCapture() {
+        if (isCapturing || !cameraBound) return
+        isCapturing = true
+        imageCapture.takePicture(
+            ContextCompat.getMainExecutor(context),
+            object : ImageCapture.OnImageCapturedCallback() {
+                override fun onCaptureSuccess(image: ImageProxy) {
+                    image.close()
+                    // Notify parent immediately – parent will stop the alarm
+                    currentOnCaptured()
+                }
+                override fun onError(exception: ImageCaptureException) {
+                    Log.e("ZolarmCamera", "capture failed", exception)
+                    isCapturing = false
+                    // Retry once after short delay is handled by parent restart if needed
+                }
+            }
+        )
+    }
+
     LaunchedEffect(lifecycleOwner, useFrontCamera) {
         cameraBound = false
         bindError = null
+        autoStarted = false
+        countdown = 3
         try {
             val provider = context.awaitCameraProvider()
             val preview = Preview.Builder().build().also {
@@ -128,7 +154,6 @@ fun CameraChallenge(
             cameraBound = true
         } catch (t: Throwable) {
             Log.e("ZolarmCamera", "bind failed", t)
-            // Fallback: try the other camera
             try {
                 val provider = context.awaitCameraProvider()
                 val preview = Preview.Builder().build().also {
@@ -150,6 +175,20 @@ fun CameraChallenge(
         }
     }
 
+    // Auto-capture: countdown 3-2-1 then shoot
+    LaunchedEffect(cameraBound, useFrontCamera) {
+        if (!cameraBound) return@LaunchedEffect
+        autoStarted = true
+        countdown = 3
+        while (countdown > 0) {
+            delay(1000)
+            countdown--
+        }
+        if (cameraBound && !isCapturing) {
+            doCapture()
+        }
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             runCatching { ProcessCameraProvider.getInstance(context).get().unbindAll() }
@@ -166,17 +205,19 @@ fun CameraChallenge(
                 .fillMaxWidth()
                 .aspectRatio(3f / 4f)
                 .clip(RoundedCornerShape(28.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
         ) {
             AndroidView(
                 factory = { previewView },
                 modifier = Modifier.matchParentSize()
             )
 
-            // Switch camera button overlay
             IconButton(
                 onClick = {
-                    if (!isCapturing) useFrontCamera = !useFrontCamera
+                    if (!isCapturing) {
+                        useFrontCamera = !useFrontCamera
+                    }
                 },
                 enabled = cameraBound && !isCapturing,
                 colors = IconButtonDefaults.iconButtonColors(
@@ -194,7 +235,6 @@ fun CameraChallenge(
                 )
             }
 
-            // Lens label
             Text(
                 text = if (useFrontCamera) stringResource(R.string.front_camera)
                 else stringResource(R.string.back_camera),
@@ -209,6 +249,24 @@ fun CameraChallenge(
                     )
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             )
+
+            // Big countdown in center
+            if (cameraBound && countdown > 0 && !isCapturing) {
+                Text(
+                    text = countdown.toString(),
+                    fontSize = 72.sp,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            if (isCapturing) {
+                Text(
+                    text = stringResource(R.string.capturing),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
         Text(
@@ -230,7 +288,6 @@ fun CameraChallenge(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Switch
             Button(
                 onClick = { if (!isCapturing) useFrontCamera = !useFrontCamera },
                 enabled = cameraBound && !isCapturing,
@@ -245,25 +302,9 @@ fun CameraChallenge(
                 Text(stringResource(R.string.switch_camera))
             }
 
-            // Capture (primary)
+            // Manual capture still available
             Button(
-                onClick = {
-                    if (isCapturing || !cameraBound) return@Button
-                    isCapturing = true
-                    imageCapture.takePicture(
-                        ContextCompat.getMainExecutor(context),
-                        object : ImageCapture.OnImageCapturedCallback() {
-                            override fun onCaptureSuccess(image: ImageProxy) {
-                                image.close()
-                                currentOnCaptured()
-                            }
-                            override fun onError(exception: ImageCaptureException) {
-                                Log.e("ZolarmCamera", "capture failed", exception)
-                                isCapturing = false
-                            }
-                        }
-                    )
-                },
+                onClick = { doCapture() },
                 enabled = cameraBound && !isCapturing,
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
@@ -278,14 +319,6 @@ fun CameraChallenge(
                     modifier = Modifier.size(34.dp)
                 )
             }
-        }
-
-        if (isCapturing) {
-            Text(
-                text = stringResource(R.string.capturing),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
         }
     }
 }
