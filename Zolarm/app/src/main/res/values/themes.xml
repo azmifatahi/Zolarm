@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.Zolarm" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowBackground">@color/zolarm_ink</item>
+    </style>
+
+    <style name="Theme.Zolarm.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/zolarm_ink</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_zolarm_logo</item>
+        <item name="windowSplashScreenAnimationDuration">600</item>
+        <item name="postSplashScreenTheme">@style/Theme.Zolarm</item>
+    </style>
+
+    <style name="Theme.Zolarm.Overlay" parent="Theme.Zolarm">
+        <item name="android:windowBackground">@color/zolarm_ink</item>
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Zolarm</string>
+    <string name="app_tagline">No excuses. Get up.</string>
+
+    <string name="channel_alarm_name">Zolarm Alarms</string>
+    <string name="channel_alarm_desc">Full-screen forced alarms</string>
+    <string name="channel_service_name">Zolarm Engine</string>
+    <string name="channel_service_desc">Keeps the alarm engine alive in background</string>
+
+    <string name="notif_alarm_title">\u23F0 %1$s</string>
+    <string name="notif_alarm_text">Zolarm is ringing - complete your challenge</string>
+    <string name="notif_service_title">Zolarm engine active</string>
+    <string name="notif_service_text">Monitoring %1$d active reminder(s)</string>
+    <string name="action_dismiss">Dismiss</string>
+</resources>
