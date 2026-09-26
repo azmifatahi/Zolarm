@@ -6,15 +6,6 @@ on:
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
-    inputs:
-      build_type:
-        description: "Gradle task to run"
-        required: true
-        default: "assembleDebug"
-        type: choice
-        options:
-          - assembleDebug
-          - assembleRelease
 
 permissions:
   contents: read
@@ -26,7 +17,6 @@ concurrency:
 env:
   GRADLE_VERSION: "8.7"
   JAVA_VERSION: "17"
-  # Preinstalled on GitHub-hosted ubuntu runners
   ANDROID_HOME: /usr/local/lib/android/sdk
   ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
@@ -49,45 +39,24 @@ jobs:
       - name: Accept Android licenses and ensure platform 34
         run: |
           set -euo pipefail
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          ls -la "$ANDROID_HOME" || true
-
-          # Find sdkmanager (path varies by runner image)
           SDKMANAGER=""
           for candidate in \
             "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
             "$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager" \
             "$ANDROID_HOME/cmdline-tools/12.0/bin/sdkmanager" \
             "$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -1)"; do
-            if [ -x "$candidate" ]; then
-              SDKMANAGER="$candidate"
-              break
-            fi
+            if [ -x "$candidate" ]; then SDKMANAGER="$candidate"; break; fi
           done
-
           if [ -z "$SDKMANAGER" ]; then
-            echo "sdkmanager not found – downloading command-line tools"
             mkdir -p "$ANDROID_HOME/cmdline-tools"
             curl -fsSL -o /tmp/cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
             unzip -q /tmp/cmdtools.zip -d "$ANDROID_HOME/cmdline-tools"
             mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
             SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           fi
-
-          echo "Using sdkmanager: $SDKMANAGER"
-          # Non-interactive license accept
-          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/tmp/sdk-licenses.log 2>&1 || true
-          tail -20 /tmp/sdk-licenses.log || true
-
-          # Install what we need (idempotent)
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null 2>&1 || true
           yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" \
-            "platforms;android-34" \
-            "build-tools;34.0.0" \
-            "platform-tools" >/tmp/sdk-install.log 2>&1 || true
-          tail -30 /tmp/sdk-install.log || true
-
-          echo "SDK platforms present:"
-          ls "$ANDROID_HOME/platforms" || true
+            "platforms;android-34" "build-tools;34.0.0" "platform-tools" >/dev/null 2>&1 || true
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -100,62 +69,50 @@ jobs:
         run: |
           gradle wrapper --gradle-version ${{ env.GRADLE_VERSION }} --distribution-type bin
           chmod +x ./gradlew
-          ./gradlew --version
+
+      - name: Verify keystore exists
+        run: |
+          ls -la keystore/
+          test -f keystore/zolarm-debug.jks
 
       - name: Assemble Debug APK
-        if: ${{ github.event.inputs.build_type != 'assembleRelease' }}
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Assemble Release APK
-        if: ${{ github.event.inputs.build_type == 'assembleRelease' }}
-        run: ./gradlew assembleRelease --no-daemon --stacktrace
-
-      - name: Locate and rename APK
-        if: ${{ github.event.inputs.build_type != 'assembleRelease' }}
+      - name: Validate and prepare APK
         run: |
           set -euo pipefail
-          SRC_DIR="app/build/outputs/apk/debug"
-          echo "Looking for APK under $SRC_DIR"
-          find app/build/outputs -name "*.apk" -type f || true
-          if [ -f "$SRC_DIR/app-debug.apk" ]; then
-            mv "$SRC_DIR/app-debug.apk" "$SRC_DIR/Zolarm-debug.apk"
-            echo "Renamed to Zolarm-debug.apk"
-          elif [ -f "$SRC_DIR/Zolarm-debug.apk" ]; then
-            echo "Zolarm-debug.apk already present"
-          else
-            echo "ERROR: No debug APK found"
-            ls -laR app/build/outputs || true
+          SRC="app/build/outputs/apk/debug/app-debug.apk"
+          DEST="app/build/outputs/apk/debug/Zolarm-debug.apk"
+          if [ ! -f "$SRC" ]; then
+            echo "APK not found!"
+            find app/build/outputs -type f -name "*.apk" || true
             exit 1
           fi
-          ls -lah "$SRC_DIR"
-
-      - name: Locate release APK
-        if: ${{ github.event.inputs.build_type == 'assembleRelease' }}
-        run: |
-          set -euo pipefail
-          SRC_DIR="app/build/outputs/apk/release"
-          find app/build/outputs -name "*.apk" -type f || true
-          if [ -f "$SRC_DIR/app-release-unsigned.apk" ]; then
-            mv "$SRC_DIR/app-release-unsigned.apk" "$SRC_DIR/Zolarm-release-unsigned.apk"
+          # Must be a ZIP (APK is a zip)
+          file "$SRC"
+          unzip -t "$SRC" >/dev/null
+          # Must contain AndroidManifest.xml
+          unzip -l "$SRC" | grep -q "AndroidManifest.xml"
+          SIZE=$(stat -c%s "$SRC")
+          echo "APK size: $SIZE bytes"
+          if [ "$SIZE" -lt 500000 ]; then
+            echo "APK suspiciously small"
+            exit 1
           fi
-          ls -lah "$SRC_DIR" || true
+          cp -f "$SRC" "$DEST"
+          ls -lah "$DEST"
+          # Print package info if aapt available
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt 2>/dev/null | head -1 || true)
+          if [ -n "$AAPT" ]; then
+            "$AAPT" dump badging "$DEST" | head -20 || true
+          fi
 
       - name: Upload Zolarm Debug APK
-        if: ${{ github.event.inputs.build_type != 'assembleRelease' }}
         uses: actions/upload-artifact@v4
         with:
           name: Zolarm-debug-apk
           path: app/build/outputs/apk/debug/Zolarm-debug.apk
           if-no-files-found: error
-          retention-days: 30
-
-      - name: Upload Zolarm Release APK
-        if: ${{ github.event.inputs.build_type == 'assembleRelease' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Zolarm-release-apk
-          path: app/build/outputs/apk/release/*.apk
-          if-no-files-found: warn
           retention-days: 30
 
       - name: Upload build reports on failure
@@ -165,7 +122,6 @@ jobs:
           name: zolarm-build-reports
           path: |
             **/build/reports/**
-            **/build/outputs/logs/**
             **/build/outputs/**
           if-no-files-found: ignore
           retention-days: 7
