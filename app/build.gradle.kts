@@ -12,11 +12,12 @@ android {
         applicationId = "com.zolarm.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.2.1"
+        multiDexEnabled = true
 
         vectorDrawables { useSupportLibrary = true }
-            }
+    }
 
     buildTypes {
         debug { isMinifyEnabled = false }
@@ -54,6 +55,9 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/DEPENDENCIES"
         }
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 
     lint { abortOnError = false }
@@ -63,6 +67,7 @@ ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.multidex:multidex:2.0.1")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
@@ -97,9 +102,8 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
-    // Face detection for wake-up camera challenge
+    // Face detection (bundled model – works without Google Play Services)
     implementation("com.google.mlkit:face-detection:16.1.7")
-    implementation("com.google.android.gms:play-services-mlkit-face-detection:17.1.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
